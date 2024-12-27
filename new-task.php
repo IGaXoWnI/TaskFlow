@@ -22,13 +22,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['taskTitle'] ?? '';
     $description = $_POST['taskDescription'] ?? '';
     $type = $_POST['taskType'] ?? 'basic';
-    $assignee = $_POST['taskAssignee'] ?? null;
+    $assigneeName = $_POST['taskAssignee'] ?? null;
     $status = $_POST['status'] ?? 'todo';
+
+    // Get assignee_id from the name
+    $assigneeId = null;
+    if ($assigneeName) {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE name = ?");
+        $stmt->execute([$assigneeName]);
+        $assigneeId = $stmt->fetchColumn();
+    }
+
+    // Set assignee_id in $_POST so TaskManager can use it
+    $_POST['assignee_id'] = $assigneeId;
 
     $task = $taskManager->createTask($title, $description, $type);
     $task->setStatus($status);
-    if ($assignee) {
-        $task->setAssignee($assignee);
+    if ($assigneeName) {
+        $task->setAssignee($assigneeName);
     }
 
     header('Location: index.php');
