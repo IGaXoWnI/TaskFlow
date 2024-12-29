@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $assigneeName = $_POST['taskAssignee'] ?? null;
     $status = $_POST['status'] ?? 'todo';
 
-    // Get assignee_id from the name
     $assigneeId = null;
     if ($assigneeName) {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE name = ?");
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $assigneeId = $stmt->fetchColumn();
     }
 
-    // Set assignee_id in $_POST so TaskManager can use it
     $_POST['assignee_id'] = $assigneeId;
 
     $task = $taskManager->createTask($title, $description, $type);
@@ -72,14 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2 class="text-2xl font-bold mb-6">Create New Task</h2>
             
             <form action="new-task.php" method="POST" class="space-y-4">
- 
                 <div>
                     <label for="taskTitle" class="block text-sm font-medium text-gray-700">Title</label>
                     <input type="text" name="taskTitle" id="taskTitle" required
                         class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
 
-          
                 <div>
                     <label for="taskDescription" class="block text-sm font-medium text-gray-700">Description</label>
                     <textarea name="taskDescription" id="taskDescription" rows="4" required
@@ -96,7 +92,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </select>
                 </div>
 
-
+                <div id="bugFields" class="hidden">
+                    <label for="severity" class="block text-sm font-medium text-gray-700">Severity</label>
+                    <select name="severity" id="severity"
+                        class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
 
                 <div id="featureFields" class="hidden">
                     <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
@@ -117,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="done">Done</option>
                     </select>
                 </div>
-
 
                 <div>
                     <label for="taskAssignee" class="block text-sm font-medium text-gray-700">Assignee</label>

@@ -11,5 +11,4 @@ class Feature extends Task {
     public function getPriority(): string {
         return $this->priority;
     }
-    
 } 

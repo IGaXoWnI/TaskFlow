@@ -11,10 +11,12 @@ CREATE TABLE tasks (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     type type_enum DEFAULT 'basic',
-    status status_enum DEFAULT 'open',
+    status status_enum DEFAULT 'todo', 
+    severity VARCHAR(50),
+    priority VARCHAR(50),
     created_at TIMESTAMP NOT NULL, 
     assignee_id BIGINT REFERENCES users(id)
-);  
+);
 
 
 

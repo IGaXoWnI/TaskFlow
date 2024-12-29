@@ -21,11 +21,20 @@ class TaskManager {
         
         foreach ($tasks as $taskData) {
             $task = match($taskData['type']) {
-                'bug' => new Bug($taskData['title'], $taskData['description']),
-                'feature' => new Feature($taskData['title'], $taskData['description']),
+                'bug' => new Bug(
+                    $taskData['title'], 
+                    $taskData['description'], 
+                    $taskData['severity'] ?? 'medium'
+                ),
+                'feature' => new Feature(
+                    $taskData['title'], 
+                    $taskData['description'], 
+                    $taskData['priority'] ?? 'medium'
+                ),
                 default => new Task($taskData['title'], $taskData['description'])
             };
             
+            $task->setId($taskData['task_id']);
             $task->setStatus($taskData['status']);
             if (isset($taskData['assignee_name'])) {
                 $task->setAssignee($taskData['assignee_name']);
@@ -37,8 +46,8 @@ class TaskManager {
 
     public function createTask(string $title, string $description, string $type = 'basic'): Task {
         $task = match($type) {
-            'bug' => new Bug($title, $description),
-            'feature' => new Feature($title, $description),
+            'bug' => new Bug($title, $description, $_POST['severity'] ?? 'medium'),
+            'feature' => new Feature($title, $description, $_POST['priority'] ?? 'medium'),
             default => new Task($title, $description)
         };
         
@@ -47,27 +56,27 @@ class TaskManager {
         
         $assigneeId = $_POST['assignee_id'] ?? null;
         
-        $stmt = $this->pdo->prepare("INSERT INTO tasks (title, description, type, status, created_at, assignee_id) 
-                                   VALUES (:title, :description, :type, :status, NOW(), :assignee_id)");
+        $stmt = $this->pdo->prepare("
+            INSERT INTO tasks (
+                title, description, type, status, created_at, assignee_id, 
+                severity, priority
+            ) 
+            VALUES (
+                :title, :description, :type, :status, NOW(), :assignee_id,
+                :severity, :priority
+            )
+        ");
         
         $stmt->execute([
             ':title' => $task->getTitle(),
             ':description' => $task->getDescription(),
             ':type' => $task->getType(),
             ':status' => $task->getStatus(),
-            ':assignee_id' => $assigneeId
+            ':assignee_id' => $assigneeId,
+            ':severity' => ($task instanceof Bug) ? $task->getSeverity() : null,
+            ':priority' => ($task instanceof Feature) ? $task->getPriority() : null
         ]);
         
-        if ($assigneeId) {
-            $stmt = $this->pdo->prepare("SELECT name FROM users WHERE id = ?");
-            $stmt->execute([$assigneeId]);
-            $assigneeName = $stmt->fetchColumn();
-            if ($assigneeName) {
-                $task->setAssignee($assigneeName);
-            }
-        }
-        
-        $this->tasks[] = $task;
         return $task;
     }
 
@@ -75,13 +84,11 @@ class TaskManager {
         return $this->tasks;
     }
 
-    public function getTasksByAssignee(string $assignee): array {
-        $assignedTasks = [];
-        foreach ($this->tasks as $task) {
-            if ($task->getAssignee() === $assignee) {
-                $assignedTasks[] = $task;
-            }
-        }
-        return $assignedTasks;
+    public function updateTaskStatus(int $taskId, string $newStatus): void {
+        $stmt = $this->pdo->prepare("UPDATE tasks SET status = :status WHERE task_id = :id");
+        $stmt->execute([
+            ':status' => $newStatus,
+            ':id' => $taskId
+        ]);
     }
 } 
