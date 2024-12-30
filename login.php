@@ -8,13 +8,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
     
     if ($name) {
-        $stmt = $pdo->prepare("INSERT INTO users (name, created_at) 
-                             VALUES (:name, NOW()) 
-                             ON CONFLICT (name) DO NOTHING");
-        $stmt->execute([':name' => $name]);
+        require_once 'src/User.php';
+        $user = User::login($pdo, $name);
         
         session_start();
-        $_SESSION['user_name'] = $name;
+        $_SESSION['user_name'] = $user->getName();
         
         header('Location: index.php');
         exit();

@@ -1,5 +1,9 @@
 <?php
 
+require_once 'Task.php';
+require_once 'Bug.php';
+require_once 'Feature.php';
+
 class TaskManager {
     private array $tasks = [];
     private PDO $pdo;

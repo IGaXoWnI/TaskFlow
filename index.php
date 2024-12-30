@@ -43,7 +43,7 @@ $allTasks = $taskManager->getAllTasks();
                     <a href="new-task.php" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600">
                         + New Task
                     </a>
-                    <a href="my-tasks.php" class="text-white hover:text-gray-200">My Tasks</a>
+                    <!-- <a href="my-tasks.php" class="text-white hover:text-gray-200">My Tasks</a> -->
                     <a href="logout.php" class="text-white hover:text-gray-200">Exit</a>
                     <span class="text-white">Welcome, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
                 </div>
